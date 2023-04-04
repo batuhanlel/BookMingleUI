@@ -27,7 +27,10 @@ class _NaviqationState extends State<Naviqation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _destinations.elementAt(_selectedIndex),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _destinations,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
