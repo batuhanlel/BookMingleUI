@@ -36,60 +36,66 @@ class _LoginScreenState extends State<LoginScreen> {
     Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          alignment: Alignment.center,
-          children: <Widget>[
-            Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    "Welcome Back",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: size.width * 0.08,
-                    ),
+      body: SingleChildScrollView(
+        child: SizedBox(
+          height: size.height,
+          width: size.width,
+          child: SafeArea(
+            child: Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        "Welcome Back",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: size.width * 0.08,
+                        ),
+                      ),
+                      SizedBox(height: size.height * 0.02),
+                      RoundedInputField(
+                        errorText:
+                            _errors.containsKey('email') ? _errors['email'] : null,
+                        hintText: "Your Email",
+                        onSaved: (value) => requestModel.email = value?.trim(),
+                      ),
+                      RoundedPasswordField(
+                        errorText: _errors.containsKey('password')
+                            ? _errors['password']
+                            : null,
+                        onSaved: (value) => requestModel.password = value?.trim(),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            setState(() {
+                              hidePassword = !hidePassword;
+                            });
+                          },
+                          icon: Icon(hidePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off),
+                        ),
+                        obscureText: hidePassword ? true : false,
+                      ),
+                      SizedBox(height: size.height * 0.02),
+                      RoundedButton(
+                        text: "Login",
+                        press: _handleLogin,
+                      ),
+                      AlreadyHaveAnAccountCheck(
+                        login: true,
+                        press: _navigateToSignUpScreen,
+                      )
+                    ],
                   ),
-                  SizedBox(height: size.height * 0.02),
-                  RoundedInputField(
-                    errorText:
-                        _errors.containsKey('email') ? _errors['email'] : null,
-                    hintText: "Your Email",
-                    onSaved: (value) => requestModel.email = value?.trim(),
-                  ),
-                  RoundedPasswordField(
-                    errorText: _errors.containsKey('password')
-                        ? _errors['password']
-                        : null,
-                    onSaved: (value) => requestModel.password = value?.trim(),
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        setState(() {
-                          hidePassword = !hidePassword;
-                        });
-                      },
-                      icon: Icon(hidePassword
-                          ? Icons.visibility
-                          : Icons.visibility_off),
-                    ),
-                    obscureText: hidePassword ? true : false,
-                  ),
-                  SizedBox(height: size.height * 0.02),
-                  RoundedButton(
-                    text: "Login",
-                    press: _handleLogin,
-                  ),
-                  AlreadyHaveAnAccountCheck(
-                    login: true,
-                    press: _navigateToSignUpScreen,
-                  )
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
