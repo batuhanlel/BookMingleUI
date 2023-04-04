@@ -21,12 +21,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   bool hidePassword = true;
   late LoginRequestModel requestModel;
+  late Map<String, dynamic> _errors;
   final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
     super.initState();
     requestModel = LoginRequestModel();
+    _errors = {};
   }
 
   @override
@@ -53,10 +55,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   SizedBox(height: size.height * 0.02),
                   RoundedInputField(
+                    errorText:
+                        _errors.containsKey('email') ? _errors['email'] : null,
                     hintText: "Your Email",
                     onSaved: (value) => requestModel.email = value?.trim(),
                   ),
                   RoundedPasswordField(
+                    errorText: _errors.containsKey('password')
+                        ? _errors['password']
+                        : null,
                     onSaved: (value) => requestModel.password = value?.trim(),
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -103,18 +110,30 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         String? token = await storage.read(key: 'token');
         print("current key ${token!}");
-        showErrorMessages(response.error.toString());
+        showFormValidationErrorMessages(response.errors);
+        showBadCredentialsErrorMessages(response.error.toString());
       }
     });
   }
 
-  void showErrorMessages(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  void showFormValidationErrorMessages(Map<String, dynamic> errors) {
+    if (errors.isNotEmpty) {
+      setState(() {
+        _errors = errors;
+        _formKey.currentState?.reset();
+      });
+    }
+  }
+
+  void showBadCredentialsErrorMessages(String message) {
+    if (message.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _navigateToSignUpScreen() {
