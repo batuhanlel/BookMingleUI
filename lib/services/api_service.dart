@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:book_mingle_ui/models/exchane_book_model.dart';
+import 'package:book_mingle_ui/models/exchange_book_model.dart';
 import 'package:book_mingle_ui/models/login_model.dart';
 import 'package:book_mingle_ui/models/signup_model.dart';
 import 'package:book_mingle_ui/constant.dart';
