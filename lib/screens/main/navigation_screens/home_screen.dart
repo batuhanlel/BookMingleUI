@@ -1,4 +1,5 @@
 import 'package:book_mingle_ui/models/exchange_book_model.dart';
+import 'package:book_mingle_ui/screens/main/search_screen.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -34,29 +35,20 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: TextField(
+          onTap: _navigateToSearchScreen,
+          decoration: const InputDecoration(
+            hintText: 'Search Book, Author, Publisher',
+            icon: Icon(Icons.search),
+            border: InputBorder.none,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              margin: EdgeInsets.symmetric(
-                vertical: size.height * 0.03,
-                horizontal: size.width * 0.02,
-              ),
-              width: size.width * 0.8,
-              padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(29),
-                // color: Colors.lightBlue,
-              ),
-              child: TextFormField(
-                onTap: _navigateToSearchScreen,
-                decoration: const InputDecoration(
-                  hintText: 'search',
-                  icon: Icon(Icons.search),
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
             Expanded(
               child: SmartRefresher(
                 controller: _refreshController,
@@ -102,14 +94,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToSearchScreen() {
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) {
-    //       return SearchPage();
-    //     },
-    //   ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return const SearchScreen();
+        },
+      ),
+    );
   }
 
   Future<bool> _firstLoad() async {
