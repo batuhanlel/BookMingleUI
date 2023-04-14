@@ -1,6 +1,6 @@
-import 'package:book_mingle_ui/screens/main/chat_screen.dart';
-import 'package:book_mingle_ui/screens/main/home_screen.dart';
-import 'package:book_mingle_ui/screens/main/profile_screen.dart';
+import 'package:book_mingle_ui/screens/main/navigation_screens/chat_screen.dart';
+import 'package:book_mingle_ui/screens/main/navigation_screens/home_screen.dart';
+import 'package:book_mingle_ui/screens/main/navigation_screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class Naviqation extends StatefulWidget {
@@ -38,8 +38,9 @@ class _NaviqationState extends State<Naviqation> {
             label: "",
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
+            activeIcon: Icon(Icons.home),
             label: "",
+            icon: Icon(Icons.home_outlined)
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
