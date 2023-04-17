@@ -45,7 +45,7 @@ class ExchangeBookRequestModel {
     this.searchText,
     this.sort = 'title',
     required this.page,
-    this.length = 3,
+    this.length = 10,
   });
 
   Map<String, dynamic> toQueryParam() {
