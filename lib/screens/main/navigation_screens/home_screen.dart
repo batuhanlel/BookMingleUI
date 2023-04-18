@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onTap: _navigateToSearchScreen,
           decoration: const InputDecoration(
             hintText: 'Search Book, Author, Publisher',
-            icon: Icon(Icons.search),
+            suffixIcon: Icon(Icons.search),
             border: InputBorder.none,
           ),
         ),
