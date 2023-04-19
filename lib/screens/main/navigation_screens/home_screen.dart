@@ -11,7 +11,8 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
   List<ExchangeBookResponseModel> _items = [];
   int _currentPage = 0;
   bool _hasNextPage = true;
@@ -141,4 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     return false;
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

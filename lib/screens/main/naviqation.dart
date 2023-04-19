@@ -12,7 +12,9 @@ class Naviqation extends StatefulWidget {
 
 class _NaviqationState extends State<Naviqation> {
   int _selectedIndex = 1;
-  static final List<Widget> _destinations = <Widget>[
+  final _pageController = PageController(initialPage: 1);
+
+  final List<Widget> _pages = <Widget>[
     const ChatScreen(),
     const HomeScreen(),
     const ProfileScreen(),
@@ -21,15 +23,21 @@ class _NaviqationState extends State<Naviqation> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _pageController.jumpToPage(index);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _destinations,
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _selectedIndex = index;
+          });
+        },
+        children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -40,7 +48,7 @@ class _NaviqationState extends State<Naviqation> {
           BottomNavigationBarItem(
             activeIcon: Icon(Icons.home),
             label: "",
-            icon: Icon(Icons.home_outlined)
+            icon: Icon(Icons.home_outlined),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
