@@ -34,19 +34,10 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: TextField(
-          onTap: _navigateToSearchScreen,
-          decoration: const InputDecoration(
-            hintText: 'Search Book, Author, Publisher',
-            suffixIcon: Icon(Icons.search),
-            border: InputBorder.none,
-          ),
-        ),
-      ),
+      appBar: _buildAppBar(),
       body: SafeArea(
         child: Column(
           children: [
@@ -58,38 +49,81 @@ class _HomeScreenState extends State<HomeScreen>
                 footer: const ClassicFooter(
                   loadStyle: LoadStyle.ShowWhenLoading,
                 ),
-                onRefresh: () async {
-                  bool isSuccessful = await _firstLoad();
-                  isSuccessful
-                      ? _refreshController.refreshCompleted()
-                      : _refreshController.refreshFailed();
-                },
-                onLoading: () async {
-                  bool isSuccessful = await _loadMore();
-                  isSuccessful
-                      ? _refreshController.loadComplete()
-                      : _refreshController.loadNoData();
-                },
-                child: ListView.builder(
-                  itemCount: _items.length,
-                  itemBuilder: (context, index) => Card(
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 8,
-                      horizontal: 10,
-                    ),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        child: Text(index.toString()),
-                      ),
-                      title: Text(_items[index].userEmail),
-                      subtitle: Text(_items[index].author),
-                    ),
-                  ),
-                ),
+                onRefresh: _onRefresh,
+                onLoading: _onLoading,
+                child: _buildListView(),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      title: TextField(
+        onTap: _navigateToSearchScreen,
+        decoration: const InputDecoration(
+          hintText: 'Search Book, Author, Publisher',
+          suffixIcon: Icon(Icons.search),
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onRefresh() async {
+    bool isSuccessful = await _firstLoad();
+    isSuccessful
+        ? _refreshController.refreshCompleted()
+        : _refreshController.refreshFailed();
+  }
+
+  Future<void> _onLoading() async {
+    bool isSuccessful = await _loadMore();
+    isSuccessful
+        ? _refreshController.loadComplete()
+        : _refreshController.loadNoData();
+  }
+
+  ListView _buildListView() {
+    return ListView.builder(
+      itemCount: _items.length,
+      itemBuilder: (context, index) => GestureDetector(
+        onTap: () => _bookRequestDialog(_items[index]),
+        child: Card(
+          margin: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 10,
+          ),
+          child: ListTile(
+            leading: CircleAvatar(
+              child: Text(index.toString()),
+            ),
+            title: Text(_items[index].userEmail),
+            subtitle: Text(_items[index].author),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _bookRequestDialog(ExchangeBookResponseModel item) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(item.title),
+        content: Text(item.author),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('OK'),
+          ),
+        ],
       ),
     );
   }
