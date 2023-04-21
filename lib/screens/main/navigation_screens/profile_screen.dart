@@ -54,95 +54,97 @@ class _ProfileScreenState extends State<ProfileScreen>
         backgroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.black),
       ),
-      body: SingleChildScrollView(
-        child: SizedBox(
-          width: size.width,
-          height: size.height,
-          child: SmartRefresher(
-            controller: _refreshController,
-            header: const WaterDropHeader(),
-            onRefresh: () async {
-              bool isSuccessful = await _firstLoad();
-              isSuccessful
-                  ? _refreshController.refreshCompleted()
-                  : _refreshController.refreshFailed();
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(height: size.height * 0.02),
-                CircleAvatar(
-                  radius: size.width * 0.2,
-                  // backgroundImage: AssetImage('assets/images/profile_image.jpg'),
-                ),
-                SizedBox(height: size.height * 0.02),
-                Text(
-                  "${_userProfile.name} ${_userProfile.surname}",
-                  style: Theme.of(context).textTheme.headline5,
-                ),
-                SizedBox(height: size.height * 0.01),
-                Text(
-                  _userProfile.email,
-                  style: Theme.of(context).textTheme.subtitle1,
-                ),
-                SizedBox(height: size.height * 0.02),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SmartRefresher(
+                controller: _refreshController,
+                header: const WaterDropHeader(),
+                onRefresh: () async {
+                  bool isSuccessful = await _firstLoad();
+                  isSuccessful
+                      ? _refreshController.refreshCompleted()
+                      : _refreshController.refreshFailed();
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
+                    SizedBox(height: size.height * 0.02),
+                    CircleAvatar(
+                      radius: size.width * 0.2,
+                      // backgroundImage: AssetImage('assets/images/profile_image.jpg'),
+                    ),
+                    SizedBox(height: size.height * 0.02),
+                    Text(
+                      "${_userProfile.name} ${_userProfile.surname}",
+                      style: Theme.of(context).textTheme.headline5,
+                    ),
+                    SizedBox(height: size.height * 0.01),
+                    Text(
+                      _userProfile.email,
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
+                    SizedBox(height: size.height * 0.02),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text(
-                          _userProfile.bookCount.toString(),
-                          style: Theme.of(context).textTheme.headline6,
+                        Column(
+                          children: [
+                            Text(
+                              _userProfile.bookCount.toString(),
+                              style: Theme.of(context).textTheme.headline6,
+                            ),
+                            SizedBox(height: size.height * 0.005),
+                            Text(
+                              'Books',
+                              style: Theme.of(context).textTheme.subtitle2,
+                            ),
+                          ],
                         ),
-                        SizedBox(height: size.height * 0.005),
-                        Text(
-                          'Books',
-                          style: Theme.of(context).textTheme.subtitle2,
+                        Column(
+                          children: [
+                            Text(
+                              _userProfile.successfulExchangeCount.toString(),
+                              style: Theme.of(context).textTheme.headline6,
+                            ),
+                            SizedBox(height: size.height * 0.005),
+                            Text(
+                              'Trades',
+                              style: Theme.of(context).textTheme.subtitle2,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    Column(
-                      children: [
-                        Text(
-                          _userProfile.successfulExchangeCount.toString(),
-                          style: Theme.of(context).textTheme.headline6,
-                        ),
-                        SizedBox(height: size.height * 0.005),
-                        Text(
-                          'Trades',
-                          style: Theme.of(context).textTheme.subtitle2,
-                        ),
-                      ],
+                    SizedBox(height: size.height * 0.02),
+                    ElevatedButton(
+                      onPressed: () {},
+                      child: const Text('Edit Profile'),
                     ),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: _books.length,
+                        itemBuilder: (context, index) => Card(
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 8,
+                            horizontal: 10,
+                          ),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              child: Text(index.toString()),
+                            ),
+                            title: Text(_books[index].title),
+                            subtitle: Text(_books[index].author),
+                          ),
+                        ),
+                      ),
+                    )
                   ],
                 ),
-                SizedBox(height: size.height * 0.02),
-                ElevatedButton(
-                  onPressed: () {},
-                  child: const Text('Edit Profile'),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _books.length,
-                    itemBuilder: (context, index) => Card(
-                      margin: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 10,
-                      ),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          child: Text(index.toString()),
-                        ),
-                        title: Text(_books[index].title),
-                        subtitle: Text(_books[index].author),
-                      ),
-                    ),
-                  ),
-                )
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
