@@ -45,15 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.build(context);
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Profile',
-          style: TextStyle(color: Colors.black),
-        ),
-        centerTitle: false,
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
+      appBar: _buildAppBar(),
       body: SafeArea(
         child: Column(
           children: [
@@ -61,20 +53,12 @@ class _ProfileScreenState extends State<ProfileScreen>
               child: SmartRefresher(
                 controller: _refreshController,
                 header: const WaterDropHeader(),
-                onRefresh: () async {
-                  bool isSuccessful = await _firstLoad();
-                  isSuccessful
-                      ? _refreshController.refreshCompleted()
-                      : _refreshController.refreshFailed();
-                },
+                onRefresh: _onRefresh,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: size.height * 0.02),
-                    CircleAvatar(
-                      radius: size.width * 0.2,
-                      // backgroundImage: AssetImage('assets/images/profile_image.jpg'),
-                    ),
+                    CircleAvatar(radius: size.width * 0.2),
                     SizedBox(height: size.height * 0.02),
                     Text(
                       "${_userProfile.name} ${_userProfile.surname}",
@@ -86,65 +70,92 @@ class _ProfileScreenState extends State<ProfileScreen>
                       style: Theme.of(context).textTheme.subtitle1,
                     ),
                     SizedBox(height: size.height * 0.02),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Column(
-                          children: [
-                            Text(
-                              _userProfile.bookCount.toString(),
-                              style: Theme.of(context).textTheme.headline6,
-                            ),
-                            SizedBox(height: size.height * 0.005),
-                            Text(
-                              'Books',
-                              style: Theme.of(context).textTheme.subtitle2,
-                            ),
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Text(
-                              _userProfile.successfulExchangeCount.toString(),
-                              style: Theme.of(context).textTheme.headline6,
-                            ),
-                            SizedBox(height: size.height * 0.005),
-                            Text(
-                              'Trades',
-                              style: Theme.of(context).textTheme.subtitle2,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                    _buildBookAndExchangeInfo(size),
                     SizedBox(height: size.height * 0.02),
                     ElevatedButton(
                       onPressed: () {},
                       child: const Text('Edit Profile'),
                     ),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _books.length,
-                        itemBuilder: (context, index) => Card(
-                          margin: const EdgeInsets.symmetric(
-                            vertical: 8,
-                            horizontal: 10,
-                          ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              child: Text(index.toString()),
-                            ),
-                            title: Text(_books[index].title),
-                            subtitle: Text(_books[index].author),
-                          ),
-                        ),
-                      ),
-                    )
+                    _buildListView(),
                   ],
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      title: const Text(
+        'Profile',
+        style: TextStyle(color: Colors.black),
+      ),
+      centerTitle: false,
+      backgroundColor: Colors.white,
+      iconTheme: const IconThemeData(color: Colors.black),
+    );
+  }
+
+  Future<void> _onRefresh() async {
+    bool isSuccessful = await _firstLoad();
+    isSuccessful
+        ? _refreshController.refreshCompleted()
+        : _refreshController.refreshFailed();
+  }
+
+  Row _buildBookAndExchangeInfo(Size size) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        Column(
+          children: [
+            Text(
+              _userProfile.bookCount.toString(),
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            SizedBox(height: size.height * 0.005),
+            Text(
+              'Books',
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
+          ],
+        ),
+        Column(
+          children: [
+            Text(
+              _userProfile.successfulExchangeCount.toString(),
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            SizedBox(height: size.height * 0.005),
+            Text(
+              'Trades',
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Expanded _buildListView() {
+    return Expanded(
+      child: ListView.builder(
+        itemCount: _books.length,
+        itemBuilder: (context, index) => Card(
+          margin: const EdgeInsets.symmetric(
+            vertical: 8,
+            horizontal: 10,
+          ),
+          child: ListTile(
+            leading: CircleAvatar(
+              child: Text(index.toString()),
+            ),
+            title: Text(_books[index].title),
+            subtitle: Text(_books[index].author),
+          ),
         ),
       ),
     );

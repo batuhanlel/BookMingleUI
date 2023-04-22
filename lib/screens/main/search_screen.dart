@@ -14,7 +14,7 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: false);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   List<ExchangeBookResponseModel> _items = [];
   int _currentPage = 0;
@@ -52,28 +52,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          color: Colors.grey,
-          onPressed: _navigateToHomeScreen,
-        ),
-        backgroundColor: Colors.white,
-        title: Form(
-          key: _formKey,
-          child: TextFormField(
-            onChanged: _onSearchTextChanged,
-            decoration: InputDecoration(
-              hintText: 'Search Book, Author, Publisher',
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.filter_list),
-                onPressed: _openFilterMenu,
-              ),
-              border: InputBorder.none,
-            ),
-          ),
-        ),
-      ),
+      appBar: _buildAppBar(),
       body: SafeArea(
         child: SmartRefresher(
           controller: _refreshController,
@@ -83,28 +62,59 @@ class _SearchScreenState extends State<SearchScreen> {
           footer: const ClassicFooter(
             loadStyle: LoadStyle.ShowWhenLoading,
           ),
-          onLoading: () async {
-            bool isSuccessful = await _loadMore();
-            isSuccessful
-                ? _refreshController.loadComplete()
-                : _refreshController.loadNoData();
-          },
-          child: ListView.builder(
-            itemCount: _items.length,
-            itemBuilder: (context, index) => Card(
-              margin: const EdgeInsets.symmetric(
-                vertical: 8,
-                horizontal: 10,
-              ),
-              child: ListTile(
-                leading: CircleAvatar(
-                  child: Text(index.toString()),
-                ),
-                title: Text(_items[index].userEmail),
-                subtitle: Text(_items[index].author),
-              ),
+          onLoading: _onLoading,
+          child: _buildListView(),
+        ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar() {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        color: Colors.grey,
+        onPressed: _navigateToHomeScreen,
+      ),
+      backgroundColor: Colors.white,
+      title: Form(
+        key: _formKey,
+        child: TextFormField(
+          onChanged: _onSearchTextChanged,
+          decoration: InputDecoration(
+            hintText: 'Search Book, Author, Publisher',
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.filter_list),
+              onPressed: _openFilterMenu,
             ),
+            border: InputBorder.none,
           ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _onLoading() async {
+    bool isSuccessful = await _loadMore();
+    isSuccessful
+        ? _refreshController.loadComplete()
+        : _refreshController.loadNoData();
+  }
+
+  ListView _buildListView() {
+    return ListView.builder(
+      itemCount: _items.length,
+      itemBuilder: (context, index) => Card(
+        margin: const EdgeInsets.symmetric(
+          vertical: 8,
+          horizontal: 10,
+        ),
+        child: ListTile(
+          leading: CircleAvatar(
+            child: Text(index.toString()),
+          ),
+          title: Text(_items[index].userEmail),
+          subtitle: Text(_items[index].author),
         ),
       ),
     );
@@ -188,7 +198,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _hasNextPage = true;
     _refreshController.loadComplete();
     List<ExchangeBookResponseModel> response =
-    await ApiService.exchangeBookRecommendation(_bookRequestModel);
+        await ApiService.exchangeBookRecommendation(_bookRequestModel);
     if (response.isNotEmpty) {
       setState(() {
         _items = response;
@@ -207,7 +217,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _bookRequestModel.page = _currentPage;
 
     List<ExchangeBookResponseModel> response =
-    await ApiService.exchangeBookRecommendation(_bookRequestModel);
+        await ApiService.exchangeBookRecommendation(_bookRequestModel);
     if (response.isNotEmpty) {
       setState(() {
         _items.addAll(response);
