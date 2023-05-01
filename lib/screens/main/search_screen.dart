@@ -113,7 +113,7 @@ class _SearchScreenState extends State<SearchScreen> {
           leading: CircleAvatar(
             child: Text(index.toString()),
           ),
-          title: Text(_items[index].userEmail),
+          title: Text(_items[index].title),
           subtitle: Text(_items[index].author),
         ),
       ),
