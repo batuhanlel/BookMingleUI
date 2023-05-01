@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 Book bookFromJson(String str) => Book.fromJson(json.decode(str));
-
 String bookToJson(Book data) => json.encode(data.toJson());
+
+List<Book> bookListFromJson(String str) => List<Book>.from(json.decode(str).map((x) => Book.fromJson(x)));
+String bookListToJson(List<Book> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class Book {
   Book({

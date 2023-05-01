@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:book_mingle_ui/models/book_model.dart';
 import 'package:book_mingle_ui/models/exchange_book_model.dart';
+import 'package:book_mingle_ui/models/exchange_demand_model.dart';
 import 'package:book_mingle_ui/models/login_model.dart';
 import 'package:book_mingle_ui/models/signup_model.dart';
 import 'package:book_mingle_ui/models/user_profile_model.dart';
@@ -89,5 +91,45 @@ class ApiService {
       throw Exception("Failed to Get Data");
     }
 
+  }
+
+  static Future<List<Book>> getUserBookList() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/user/books";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    final response = await http.get(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      return bookListFromJson(response.body);
+    } else {
+      throw Exception("Failed to Get Data");
+    }
+  }
+
+  static Future<bool> createExchangeRequest(ExchangeDemandRequest request) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/exchange/request";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    final response = await http.post(Uri.parse(url), headers: headers, body: exchangeDemandRequestToJson(request));
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      throw Exception("Failed to Get Data");
+    }
   }
 }

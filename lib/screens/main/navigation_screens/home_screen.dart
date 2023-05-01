@@ -1,4 +1,6 @@
+import 'package:book_mingle_ui/models/book_model.dart';
 import 'package:book_mingle_ui/models/exchange_book_model.dart';
+import 'package:book_mingle_ui/models/exchange_demand_model.dart';
 import 'package:book_mingle_ui/screens/main/search_screen.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +15,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with AutomaticKeepAliveClientMixin {
+  late Book _selectedBookForExchange;
+  late List<DropdownMenuEntry<Book>> dropdown;
   List<ExchangeBookResponseModel> _items = [];
   int _currentPage = 0;
   bool _hasNextPage = true;
@@ -23,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void initState() {
     super.initState();
+    dropdown = [];
     _bookRequestModel = ExchangeBookRequestModel(page: _currentPage);
   }
 
@@ -35,7 +40,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: _buildAppBar(),
       body: SafeArea(
@@ -75,6 +79,14 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _onRefresh() async {
+    List<Book> userbooks = await ApiService.getUserBookList();
+    setState(() {
+      dropdown = [];
+      for (Book book in userbooks) {
+        dropdown.add(DropdownMenuEntry(value: book, label: book.title));
+      }
+    });
+
     bool isSuccessful = await _firstLoad();
     isSuccessful
         ? _refreshController.refreshCompleted()
@@ -102,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen>
             leading: CircleAvatar(
               child: Text(index.toString()),
             ),
-            title: Text(_items[index].userEmail),
+            title: Text(_items[index].title),
             subtitle: Text(_items[index].author),
           ),
         ),
@@ -111,21 +123,51 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _bookRequestDialog(ExchangeBookResponseModel item) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(item.title),
-        content: Text(item.author),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
+    Size size = MediaQuery.of(context).size;
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Container(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "Create a Exchange Request for\n${item.title}-${item.author}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                ),
+                DropdownMenu(
+                  menuHeight: size.height * 0.2,
+                  label: const Text("Select a Book To Exchange"),
+                  enableFilter: true,
+                  dropdownMenuEntries: dropdown,
+                  onSelected: (Book? book) {
+                    setState(() {
+                      _selectedBookForExchange = book!;
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: size.height * 0.01,
+                ),
+                TextButton(
+                    onPressed: () async {
+                      bool _isSuccess = await ApiService.createExchangeRequest(
+                          ExchangeDemandRequest(
+                              proposedBookId: _selectedBookForExchange.id,
+                              requestedUserId: item.userId,
+                              requestedBookId: item.bookId));
+                      print(_isSuccess);
+                    },
+                    child: const Text("Create Request")),
+              ],
+            ),
+          );
+        });
   }
 
   void _navigateToSearchScreen() {
