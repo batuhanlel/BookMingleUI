@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:book_mingle_ui/models/book_model.dart';
 import 'package:book_mingle_ui/models/exchange_book_model.dart';
+import 'package:book_mingle_ui/models/exchange_demand_model.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -14,13 +16,17 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+      RefreshController(initialRefresh: true);
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   List<ExchangeBookResponseModel> _items = [];
   int _currentPage = 0;
   bool _hasNextPage = true;
   late ExchangeBookRequestModel _bookRequestModel;
   late Timer _debounce;
+
+  late Book _selectedBookForExchange;
+  late List<DropdownMenuEntry<Book>> dropdown;
+
   String _selectedCategory = 'All Categories';
   String _selectedRating = '0';
   final List<String> _ratings = [
@@ -39,6 +45,7 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
+    dropdown = [];
     _bookRequestModel = ExchangeBookRequestModel(page: _currentPage);
     _debounce = Timer(const Duration(milliseconds: 10000), () {});
   }
@@ -57,11 +64,12 @@ class _SearchScreenState extends State<SearchScreen> {
         child: SmartRefresher(
           controller: _refreshController,
           enablePullUp: true,
-          enablePullDown: false,
+          enablePullDown: true,
           header: const WaterDropHeader(),
           footer: const ClassicFooter(
             loadStyle: LoadStyle.ShowWhenLoading,
           ),
+          onRefresh: _onRefresh,
           onLoading: _onLoading,
           child: _buildListView(),
         ),
@@ -94,6 +102,20 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  Future<void> _onRefresh() async {
+    List<Book> userBooks = await ApiService.getUserBookList();
+    setState(() {
+      dropdown = [];
+      for (Book book in userBooks) {
+        dropdown.add(DropdownMenuEntry(value: book, label: book.title));
+      }
+    });
+
+    userBooks.isNotEmpty
+        ? _refreshController.refreshCompleted()
+        : _refreshController.refreshFailed();
+  }
+
   Future<void> _onLoading() async {
     bool isSuccessful = await _loadMore();
     isSuccessful
@@ -110,6 +132,7 @@ class _SearchScreenState extends State<SearchScreen> {
           horizontal: 10,
         ),
         child: ListTile(
+          onTap: () => _bookRequestDialog(_items[index]),
           leading: CircleAvatar(
             child: Text(index.toString()),
           ),
@@ -122,6 +145,71 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _navigateToHomeScreen() {
     Navigator.of(context).pop();
+  }
+
+  void _bookRequestDialog(ExchangeBookResponseModel item) {
+    Size size = MediaQuery.of(context).size;
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  "Create a Exchange Request for\n${item.title}-${item.author}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                  ),
+                ),
+              ),
+              DropdownMenu(
+                width: size.width * 0.7,
+                menuHeight: size.height * 0.2,
+                label: const Text("Select a Book To Exchange"),
+                enableFilter: true,
+                dropdownMenuEntries: dropdown,
+                onSelected: (Book? book) {
+                  setState(() {
+                    _selectedBookForExchange = book!;
+                  });
+                },
+              ),
+              SizedBox(
+                height: size.height * 0.01,
+              ),
+              TextButton(
+                  onPressed: () async {
+                    bool isSuccess = await ApiService.createExchangeRequest(
+                        ExchangeDemandRequest(
+                            proposedBookId: _selectedBookForExchange.id,
+                            requestedUserId: item.userId,
+                            requestedBookId: item.bookId));
+                    if (isSuccess) {
+                      showExchangeDemandRequestResultMessage(
+                          'Exchange Request Created Successfully');
+                    } else {
+                      showExchangeDemandRequestResultMessage(
+                          'An Error Occurred While Creating Exchange Request');
+                    }
+                  },
+                  child: const Text("Create Request")),
+            ],
+          );
+        });
+  }
+
+  void showExchangeDemandRequestResultMessage(String message) {
+    Navigator.pop(context);
+    if (message.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _openFilterMenu() {
