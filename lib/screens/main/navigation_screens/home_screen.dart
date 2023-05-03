@@ -127,47 +127,61 @@ class _HomeScreenState extends State<HomeScreen>
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
-          return Container(
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "Create a Exchange Request for\n${item.title}-${item.author}",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                    ),
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  "Create a Exchange Request for\n${item.title}-${item.author}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
                   ),
                 ),
-                DropdownMenu(
-                  menuHeight: size.height * 0.2,
-                  label: const Text("Select a Book To Exchange"),
-                  enableFilter: true,
-                  dropdownMenuEntries: dropdown,
-                  onSelected: (Book? book) {
-                    setState(() {
-                      _selectedBookForExchange = book!;
-                    });
+              ),
+              DropdownMenu(
+                menuHeight: size.height * 0.2,
+                label: const Text("Select a Book To Exchange"),
+                enableFilter: true,
+                dropdownMenuEntries: dropdown,
+                onSelected: (Book? book) {
+                  setState(() {
+                    _selectedBookForExchange = book!;
+                  });
+                },
+              ),
+              SizedBox(
+                height: size.height * 0.01,
+              ),
+              TextButton(
+                  onPressed: () async {
+                    bool isSuccess = await ApiService.createExchangeRequest(
+                        ExchangeDemandRequest(
+                            proposedBookId: _selectedBookForExchange.id,
+                            requestedUserId: item.userId,
+                            requestedBookId: item.bookId));
+                    if (isSuccess) {
+                      showExchangeDemandRequestResultMessage('Exchange Request Created Successfully');
+                    } else {
+                      showExchangeDemandRequestResultMessage('An Error Occurred While Creating Exchange Request');
+                    }
                   },
-                ),
-                SizedBox(
-                  height: size.height * 0.01,
-                ),
-                TextButton(
-                    onPressed: () async {
-                      bool _isSuccess = await ApiService.createExchangeRequest(
-                          ExchangeDemandRequest(
-                              proposedBookId: _selectedBookForExchange.id,
-                              requestedUserId: item.userId,
-                              requestedBookId: item.bookId));
-                      print(_isSuccess);
-                    },
-                    child: const Text("Create Request")),
-              ],
-            ),
+                  child: const Text("Create Request")),
+            ],
           );
         });
+  }
+
+  void showExchangeDemandRequestResultMessage(String message) {
+    Navigator.pop(context);
+    if (message.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   void _navigateToSearchScreen() {
