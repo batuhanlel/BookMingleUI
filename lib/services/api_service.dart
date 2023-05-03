@@ -93,6 +93,26 @@ class ApiService {
 
   }
 
+  static Future<List<Book>> getBookList() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/book/list";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    final response = await http.get(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      return bookListFromJson(response.body);
+    } else {
+      throw Exception("Failed to Get Data");
+    }
+  }
+
   static Future<List<Book>> getUserBookList() async {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'token');
@@ -130,6 +150,26 @@ class ApiService {
       return true;
     } else {
       throw Exception("Failed to Get Data");
+    }
+  }
+
+  static Future<bool> addBookToLibrary(int bookId) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/user/add/book/$bookId";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    final response = await http.post(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

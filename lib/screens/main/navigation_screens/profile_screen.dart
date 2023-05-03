@@ -16,6 +16,9 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   bool get wantKeepAlive => true;
 
+  late Book _selectedBookForLibrary;
+  late List<DropdownMenuEntry<Book>> _dropDownBooks;
+
   late UserProfileResponseModel _userProfile;
   List<Book> _books = [];
   final RefreshController _refreshController =
@@ -24,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   void initState() {
     super.initState();
+    _dropDownBooks = [];
     _userProfile = UserProfileResponseModel(
       email: "",
       name: "",
@@ -72,9 +76,21 @@ class _ProfileScreenState extends State<ProfileScreen>
                     SizedBox(height: size.height * 0.02),
                     _buildBookAndExchangeInfo(size),
                     SizedBox(height: size.height * 0.02),
-                    ElevatedButton(
-                      onPressed: () {},
-                      child: const Text('Edit Profile'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {},
+                          child: const Text('Edit Profile'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            getBooks();
+                            _addBookModal();
+                          },
+                          child: const Text('Add Books'),
+                        ),
+                      ],
                     ),
                     _buildListView(),
                   ],
@@ -159,6 +175,82 @@ class _ProfileScreenState extends State<ProfileScreen>
         ),
       ),
     );
+  }
+
+  void _addBookModal() async {
+    Size size = MediaQuery.of(context).size;
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return Column(
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  "Add Books To Your Library",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                  ),
+                ),
+              ),
+              DropdownMenu(
+                dropdownMenuEntries: _dropDownBooks,
+                width: size.width * 0.7,
+                menuHeight: size.height * 0.3,
+                label: const Text('Select a Book'),
+                enableFilter: true,
+                onSelected: (Book? book) {
+                  setState(() {
+                    _selectedBookForLibrary = book!;
+                  });
+                },
+              ),
+              SizedBox(
+                height: size.height * 0.01,
+              ),
+              TextButton(
+                  onPressed: () async {
+                    bool isSuccess = await ApiService.addBookToLibrary(
+                        _selectedBookForLibrary.id);
+                    if (isSuccess) {
+                      showAddBookToLibraryRequestMessage(
+                          "Book Added To Your Library Successfully");
+                    } else {
+                      showAddBookToLibraryRequestMessage(
+                          'An Error Occurred While Creating Exchange Request');
+                    }
+                  },
+                  child: const Text("Add Selected Book")),
+            ],
+          );
+        });
+  }
+
+  Future<void> getBooks() async {
+    if (_dropDownBooks.isEmpty) {
+      List<Book> bookList = await ApiService.getBookList();
+      setState(() {
+        for (Book book in bookList) {
+          _dropDownBooks.add(DropdownMenuEntry(
+            value: book,
+            label: book.title,
+          ));
+        }
+      });
+    }
+  }
+
+  void showAddBookToLibraryRequestMessage(String message) {
+    Navigator.pop(context);
+    if (message.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   Future<bool> _firstLoad() async {
