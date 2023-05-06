@@ -153,6 +153,27 @@ class ApiService {
     }
   }
 
+  static Future<List<ExchangeDemandResponse>> getExchangeDemands(int page) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/exchange/demand/get";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    Map<String, dynamic> params = {"page": page.toString()};
+    final response = await http.get(Uri.parse(url).replace(queryParameters: params), headers: headers);
+
+    if (response.statusCode == 200) {
+      return exchangeDemandResponseFromJson(response.body);
+    } else {
+      throw Exception("Failed to Get Data");
+    }
+  }
+
   static Future<bool> addBookToLibrary(int bookId) async {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'token');
@@ -165,6 +186,26 @@ class ApiService {
     };
 
     final response = await http.post(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static Future<bool> updateExchangeDemandStatus(int demandId, bool isAccepted) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/exchange/demand/$demandId";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    final response = await http.put(Uri.parse(url), headers: headers, body: isAccepted.toString());
 
     if (response.statusCode == 200) {
       return true;
