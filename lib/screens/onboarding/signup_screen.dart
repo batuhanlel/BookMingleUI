@@ -111,8 +111,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
     print(requestModel.toJson());
     ApiService.signup(requestModel).then((response) async {
       if (response.token.isNotEmpty) {
-        // TODO store the token and navigate to the app
         await storage.write(key: 'token', value: response.token);
+
+        ApiService.userAbout().then((userAboutResponse) async {
+          await storage.write(key: 'userId', value: userAboutResponse.id.toString());
+          await storage.write(key: 'name', value: userAboutResponse.name);
+          await storage.write(key: 'surname', value: userAboutResponse.surname);
+          await storage.write(key: 'email', value: userAboutResponse.email);
+        });
+
         Navigator.pop(context);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(

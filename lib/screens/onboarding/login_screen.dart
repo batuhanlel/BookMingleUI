@@ -104,9 +104,17 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleLogin() {
     _formKey.currentState?.save();
     print(requestModel.toJson());
-    ApiService.login(requestModel).then((response) async {
-      if (response.token.isNotEmpty) {
-        await storage.write(key: 'token', value: response.token);
+    ApiService.login(requestModel).then((loginResponse) async {
+      if (loginResponse.token.isNotEmpty) {
+        await storage.write(key: 'token', value: loginResponse.token);
+
+        ApiService.userAbout().then((userAboutResponse) async {
+          await storage.write(key: 'userId', value: userAboutResponse.id.toString());
+          await storage.write(key: 'name', value: userAboutResponse.name);
+          await storage.write(key: 'surname', value: userAboutResponse.surname);
+          await storage.write(key: 'email', value: userAboutResponse.email);
+        });
+
         Navigator.pop(context);
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -116,8 +124,8 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         String? token = await storage.read(key: 'token');
         print("current key ${token!}");
-        showFormValidationErrorMessages(response.errors);
-        showBadCredentialsErrorMessages(response.error.toString());
+        showFormValidationErrorMessages(loginResponse.errors);
+        showBadCredentialsErrorMessages(loginResponse.error.toString());
       }
     });
   }
