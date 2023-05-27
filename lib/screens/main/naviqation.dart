@@ -1,7 +1,8 @@
-import 'package:book_mingle_ui/screens/main/navigation_screens/chat_screen.dart';
 import 'package:book_mingle_ui/screens/main/navigation_screens/home_screen.dart';
 import 'package:book_mingle_ui/screens/main/navigation_screens/profile_screen.dart';
 import 'package:flutter/material.dart';
+
+import 'navigation_screens/chat_list_screen.dart';
 
 class Naviqation extends StatefulWidget {
   const Naviqation({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class _NaviqationState extends State<Naviqation> {
   final _pageController = PageController(initialPage: 1);
 
   final List<Widget> _pages = <Widget>[
-    const ChatScreen(),
+    const ChatListScreen(),
     const HomeScreen(),
     const ProfileScreen(),
   ];

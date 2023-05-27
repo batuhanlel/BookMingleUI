@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:book_mingle_ui/constant.dart';
 import 'package:book_mingle_ui/models/book_model.dart';
+import 'package:book_mingle_ui/models/chat_model.dart';
 import 'package:book_mingle_ui/models/exchange_book_model.dart';
 import 'package:book_mingle_ui/models/exchange_demand_model.dart';
 import 'package:book_mingle_ui/models/login_model.dart';
@@ -234,6 +235,26 @@ class ApiService {
       return true;
     } else {
       return false;
+    }
+  }
+
+  static Future<List<Chat>> getChatsInfo() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/chat/list/user/get";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    final response = await http.get(Uri.parse(url), headers: headers);
+
+    if (response.statusCode == 200) {
+      return chatFromJson(response.body);
+    } else {
+      throw Exception("Failed to Get Data");
     }
   }
 }
