@@ -48,13 +48,13 @@ class _HomeScreenState extends State<HomeScreen>
             Expanded(
               child: SmartRefresher(
                 controller: _refreshController,
-                enablePullUp: true,
+                enablePullUp: false,
                 header: const WaterDropHeader(),
                 footer: const ClassicFooter(
                   loadStyle: LoadStyle.ShowWhenLoading,
                 ),
                 onRefresh: _onRefresh,
-                onLoading: _onLoading,
+                // onLoading: _onLoading,
                 child: _buildListView(),
               ),
             ),
@@ -93,12 +93,12 @@ class _HomeScreenState extends State<HomeScreen>
         : _refreshController.refreshFailed();
   }
 
-  Future<void> _onLoading() async {
-    bool isSuccessful = await _loadMore();
-    isSuccessful
-        ? _refreshController.loadComplete()
-        : _refreshController.loadNoData();
-  }
+  // Future<void> _onLoading() async {
+  //   bool isSuccessful = await _loadMore();
+  //   isSuccessful
+  //       ? _refreshController.loadComplete()
+  //       : _refreshController.loadNoData();
+  // }
 
   ListView _buildListView() {
     return ListView.builder(
@@ -201,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen>
     _hasNextPage = true;
     _refreshController.loadComplete();
     List<ExchangeBookResponseModel> response =
-        await ApiService.exchangeBookRecommendation(_bookRequestModel);
+        await ApiService.exchangeBookRecommendations();
     if (response.isNotEmpty) {
       setState(() {
         _items = response;
@@ -211,27 +211,27 @@ class _HomeScreenState extends State<HomeScreen>
     return false;
   }
 
-  Future<bool> _loadMore() async {
-    if (!_hasNextPage) {
-      return false;
-    }
-
-    _currentPage++;
-    _bookRequestModel.page = _currentPage;
-
-    List<ExchangeBookResponseModel> response =
-        await ApiService.exchangeBookRecommendation(_bookRequestModel);
-    if (response.isNotEmpty) {
-      setState(() {
-        _items.addAll(response);
-      });
-      return true;
-    }
-    setState(() {
-      _hasNextPage = false;
-    });
-    return false;
-  }
+  // Future<bool> _loadMore() async {
+  //   if (!_hasNextPage) {
+  //     return false;
+  //   }
+  //
+  //   _currentPage++;
+  //   _bookRequestModel.page = _currentPage;
+  //
+  //   List<ExchangeBookResponseModel> response =
+  //       await ApiService.exchangeBookRecommendation(_bookRequestModel);
+  //   if (response.isNotEmpty) {
+  //     setState(() {
+  //       _items.addAll(response);
+  //     });
+  //     return true;
+  //   }
+  //   setState(() {
+  //     _hasNextPage = false;
+  //   });
+  //   return false;
+  // }
 
   @override
   bool get wantKeepAlive => true;

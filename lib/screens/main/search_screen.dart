@@ -286,7 +286,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _hasNextPage = true;
     _refreshController.loadComplete();
     List<ExchangeBookResponseModel> response =
-        await ApiService.exchangeBookRecommendation(_bookRequestModel);
+        await ApiService.exchangeBookSearch(_bookRequestModel);
     if (response.isNotEmpty) {
       setState(() {
         _items = response;
@@ -305,7 +305,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _bookRequestModel.page = _currentPage;
 
     List<ExchangeBookResponseModel> response =
-        await ApiService.exchangeBookRecommendation(_bookRequestModel);
+        await ApiService.exchangeBookSearch(_bookRequestModel);
     if (response.isNotEmpty) {
       setState(() {
         _items.addAll(response);

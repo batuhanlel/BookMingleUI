@@ -50,7 +50,32 @@ class ApiService {
     }
   }
 
-  static Future<List<ExchangeBookResponseModel>> exchangeBookRecommendation(ExchangeBookRequestModel requestModel) async {
+  static Future<List<ExchangeBookResponseModel>> exchangeBookRecommendations() async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/exchange/recommendations";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    final response = await http.get(Uri.parse(url), headers: headers);
+    if (response.statusCode == 200) {
+      List<dynamic> jsonArray = jsonDecode(response.body);
+      List<ExchangeBookResponseModel> items = [];
+      for (var i = 0; i < jsonArray.length; i++) {
+        items.add(ExchangeBookResponseModel.fromJson(jsonArray[i]));
+      }
+      return items;
+    } else {
+      throw Exception("Failed to Get Data");
+    }
+
+  }
+
+  static Future<List<ExchangeBookResponseModel>> exchangeBookSearch(ExchangeBookRequestModel requestModel) async {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'token');
     String url = "$baseUrl/exchange/list/get";
