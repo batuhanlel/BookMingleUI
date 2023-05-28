@@ -12,18 +12,21 @@ class Book {
     required this.title,
     required this.author,
     required this.publisher,
+    required this.imageUrl,
   });
 
   int id;
   String title;
   String author;
   String publisher;
+  String imageUrl;
 
   factory Book.fromJson(Map<String, dynamic> json) => Book(
     id: json["id"],
     title: json["title"],
     author: json["author"],
     publisher: json["publisher"],
+    imageUrl: json["imageUrl"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -31,5 +34,6 @@ class Book {
     "title": title,
     "author": author,
     "publisher": publisher,
+    "imageUrl": imageUrl,
   };
 }

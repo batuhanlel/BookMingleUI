@@ -2,6 +2,7 @@ class ExchangeBookResponseModel {
   final int bookId;
   final String title;
   final String author;
+  final String imageUrl;
   final int userId;
   final String userName;
   final String userSurname;
@@ -13,6 +14,7 @@ class ExchangeBookResponseModel {
     this.bookId,
     this.title,
     this.author,
+    this.imageUrl,
     this.userId,
     this.userName,
     this.userSurname,
@@ -26,6 +28,7 @@ class ExchangeBookResponseModel {
         json["bookId"] ?? "",
         json["title"] ?? "",
         json["author"] ?? "",
+        json["imageUrl"] ?? "",
         json["userId"] ?? "",
         json["userName"] ?? "",
         json["userSurname"] ?? "",
