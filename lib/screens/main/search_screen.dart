@@ -139,8 +139,28 @@ class _SearchScreenState extends State<SearchScreen> {
               imageUrl: _items[index].imageUrl,
             ),
           ),
-          title: Text(_items[index].title),
-          subtitle: Text(_items[index].author),
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  _items[index].title,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Flexible(
+                child: Text(
+                  " by ${_items[index].author}",
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                    color: Theme.of(context).textTheme.bodyMedium?.color,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          subtitle: Text("- ${_items[index].userName} ${_items[index].userSurname}"),
         ),
       ),
     );
@@ -160,7 +180,7 @@ class _SearchScreenState extends State<SearchScreen> {
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  "Create a Exchange Request for\n${item.title}-${item.author}",
+                  "Create a Exchange Request for\n${item.title} by ${item.author}",
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 18.0,

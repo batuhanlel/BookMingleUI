@@ -118,8 +118,29 @@ class _HomeScreenState extends State<HomeScreen>
               ),
               // child: Text(index.toString()),
             ),
-            title: Text(_items[index].title),
-            subtitle: Text(_items[index].author),
+            title: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    _items[index].title,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    " by ${_items[index].author}",
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            subtitle: Text(
+                "- ${_items[index].userName} ${_items[index].userSurname}"),
           ),
         ),
       ),
@@ -165,9 +186,11 @@ class _HomeScreenState extends State<HomeScreen>
                             requestedUserId: item.userId,
                             requestedBookId: item.bookId));
                     if (isSuccess) {
-                      showExchangeDemandRequestResultMessage('Exchange Request Created Successfully');
+                      showExchangeDemandRequestResultMessage(
+                          'Exchange Request Created Successfully');
                     } else {
-                      showExchangeDemandRequestResultMessage('An Error Occurred While Creating Exchange Request');
+                      showExchangeDemandRequestResultMessage(
+                          'An Error Occurred While Creating Exchange Request');
                     }
                   },
                   child: const Text("Create Request")),

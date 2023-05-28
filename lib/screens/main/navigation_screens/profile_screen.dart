@@ -177,7 +177,14 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
             ),
             title: Text(_userBooks[index].title),
-            subtitle: Text(_userBooks[index].author),
+            subtitle: Text(
+              " by ${_userBooks[index].author}",
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
           ),
         ),
       ),
@@ -210,30 +217,28 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ),
               ),
               Expanded(
-                child: Builder(
-                  builder: (context) {
-                    return ListView.builder(
-                      itemCount: _searchResultBooks.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        Book book = _searchResultBooks[index];
-                        return ListTile(
-                          title: Text(book.title),
-                          onTap: () async {
-                            bool isSuccess =
-                                await ApiService.addBookToLibrary(book.id);
-                            if (isSuccess) {
-                              showAddBookToLibraryRequestMessage(
-                                  "Book Added To Your Library Successfully");
-                            } else {
-                              showAddBookToLibraryRequestMessage(
-                                  'An Error Occurred While Creating Exchange Request');
-                            }
-                          },
-                        );
-                      },
-                    );
-                  }
-                ),
+                child: Builder(builder: (context) {
+                  return ListView.builder(
+                    itemCount: _searchResultBooks.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      Book book = _searchResultBooks[index];
+                      return ListTile(
+                        title: Text(book.title),
+                        onTap: () async {
+                          bool isSuccess =
+                              await ApiService.addBookToLibrary(book.id);
+                          if (isSuccess) {
+                            showAddBookToLibraryRequestMessage(
+                                "Book Added To Your Library Successfully");
+                          } else {
+                            showAddBookToLibraryRequestMessage(
+                                'An Error Occurred While Creating Exchange Request');
+                          }
+                        },
+                      );
+                    },
+                  );
+                }),
               )
             ],
           );
