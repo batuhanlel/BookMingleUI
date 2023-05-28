@@ -142,7 +142,7 @@ class ApiService {
 
   }
 
-  static Future<List<Book>> getBookList() async {
+  static Future<List<Book>> getBookList(String query) async {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'token');
     String url = "$baseUrl/book/list";
@@ -153,7 +153,8 @@ class ApiService {
       'Authorization' : 'Bearer $token'
     };
 
-    final response = await http.get(Uri.parse(url), headers: headers);
+    Map<String, dynamic> params = {"search": query};
+    final response = await http.get(Uri.parse(url).replace(queryParameters: params), headers: headers);
 
     if (response.statusCode == 200) {
       return bookListFromJson(response.body);

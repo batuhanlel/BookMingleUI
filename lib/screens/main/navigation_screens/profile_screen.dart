@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:book_mingle_ui/models/book_model.dart';
 import 'package:book_mingle_ui/models/user_profile_model.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
@@ -16,18 +18,20 @@ class _ProfileScreenState extends State<ProfileScreen>
   @override
   bool get wantKeepAlive => true;
 
-  late Book _selectedBookForLibrary;
-  late List<DropdownMenuEntry<Book>> _dropDownBooks;
+  late Timer _debounce;
+
+  late List<Book> _searchResultBooks;
 
   late UserProfileResponseModel _userProfile;
-  List<Book> _books = [];
+  List<Book> _userBooks = [];
   final RefreshController _refreshController =
       RefreshController(initialRefresh: true);
 
   @override
   void initState() {
     super.initState();
-    _dropDownBooks = [];
+    _debounce = Timer(const Duration(milliseconds: 10000), () {});
+    _searchResultBooks = [];
     _userProfile = UserProfileResponseModel(
       email: "",
       name: "",
@@ -85,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                         ElevatedButton(
                           onPressed: () {
-                            getBooks();
+                            getBooksWithoutQuery();
                             _addBookModal();
                           },
                           child: const Text('Add Books'),
@@ -159,7 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   Expanded _buildListView() {
     return Expanded(
       child: ListView.builder(
-        itemCount: _books.length,
+        itemCount: _userBooks.length,
         itemBuilder: (context, index) => Card(
           margin: const EdgeInsets.symmetric(
             vertical: 8,
@@ -169,8 +173,8 @@ class _ProfileScreenState extends State<ProfileScreen>
             leading: CircleAvatar(
               child: Text(index.toString()),
             ),
-            title: Text(_books[index].title),
-            subtitle: Text(_books[index].author),
+            title: Text(_userBooks[index].title),
+            subtitle: Text(_userBooks[index].author),
           ),
         ),
       ),
@@ -178,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   void _addBookModal() async {
-    Size size = MediaQuery.of(context).size;
+    TextEditingController searchController = TextEditingController();
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
@@ -194,51 +198,71 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                 ),
               ),
-              DropdownMenu(
-                dropdownMenuEntries: _dropDownBooks,
-                width: size.width * 0.7,
-                menuHeight: size.height * 0.3,
-                label: const Text('Select a Book'),
-                enableFilter: true,
-                onSelected: (Book? book) {
-                  setState(() {
-                    _selectedBookForLibrary = book!;
-                  });
-                },
+              TextField(
+                controller: searchController,
+                onChanged: getBooks,
+                decoration: const InputDecoration(
+                  labelText: 'Search for a Book',
+                  prefixIcon: Icon(Icons.search),
+                ),
               ),
-              SizedBox(
-                height: size.height * 0.01,
-              ),
-              TextButton(
-                  onPressed: () async {
-                    bool isSuccess = await ApiService.addBookToLibrary(
-                        _selectedBookForLibrary.id);
-                    if (isSuccess) {
-                      showAddBookToLibraryRequestMessage(
-                          "Book Added To Your Library Successfully");
-                    } else {
-                      showAddBookToLibraryRequestMessage(
-                          'An Error Occurred While Creating Exchange Request');
-                    }
-                  },
-                  child: const Text("Add Selected Book")),
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    return ListView.builder(
+                      itemCount: _searchResultBooks.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        Book book = _searchResultBooks[index];
+                        return ListTile(
+                          title: Text(book.title),
+                          onTap: () async {
+                            bool isSuccess =
+                                await ApiService.addBookToLibrary(book.id);
+                            if (isSuccess) {
+                              showAddBookToLibraryRequestMessage(
+                                  "Book Added To Your Library Successfully");
+                            } else {
+                              showAddBookToLibraryRequestMessage(
+                                  'An Error Occurred While Creating Exchange Request');
+                            }
+                          },
+                        );
+                      },
+                    );
+                  }
+                ),
+              )
             ],
           );
         });
   }
 
-  Future<void> getBooks() async {
-    if (_dropDownBooks.isEmpty) {
-      List<Book> bookList = await ApiService.getBookList();
+  Future<void> getBooksWithoutQuery() async {
+    if (_searchResultBooks.isEmpty) {
+      List<Book> books = await ApiService.getBookList("_");
+
       setState(() {
-        for (Book book in bookList) {
-          _dropDownBooks.add(DropdownMenuEntry(
-            value: book,
-            label: book.title,
-          ));
-        }
+        _searchResultBooks.clear();
+        _searchResultBooks.addAll(books);
       });
     }
+  }
+
+  Future<void> getBooks(String query) async {
+    if (_debounce.isActive) _debounce.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 1000), () async {
+      if (query.length >= 3) {
+        List<Book> books = await ApiService.getBookList(query);
+
+        setState(() {
+          _searchResultBooks.clear();
+          _searchResultBooks.addAll(books);
+        });
+      }
+    });
+
+    Scaffold.of(context).setState(() {});
   }
 
   void showAddBookToLibraryRequestMessage(String message) {
@@ -257,7 +281,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     UserProfileResponseModel response = await ApiService.userProfile();
     setState(() {
       _userProfile = response;
-      _books = _userProfile.books;
+      _userBooks = _userProfile.books;
     });
     return true;
   }
