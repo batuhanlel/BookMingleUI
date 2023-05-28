@@ -108,6 +108,9 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       dropdown = [];
       for (Book book in userBooks) {
+        if (book.title.length > 40) {
+          book.title = '${book.title.substring(0, 40)}...';
+        }
         dropdown.add(DropdownMenuEntry(value: book, label: book.title));
       }
     });
@@ -345,7 +348,9 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       _bookRequestModel.searchText = newText;
     });
-    if (_debounce?.isActive ?? false) _debounce.cancel();
+
+    if (_debounce.isActive) _debounce.cancel();
+    
     _debounce = Timer(const Duration(milliseconds: 1000), () async {
       if (newText.length >= 3) {
         await _firstLoad();
