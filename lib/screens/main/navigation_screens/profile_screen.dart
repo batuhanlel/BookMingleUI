@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:book_mingle_ui/models/book_model.dart';
 import 'package:book_mingle_ui/models/user_profile_model.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
+import 'package:book_mingle_ui/services/network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -171,7 +172,9 @@ class _ProfileScreenState extends State<ProfileScreen>
           ),
           child: ListTile(
             leading: CircleAvatar(
-              child: Text(index.toString()),
+              child: CustomNetWorkImage(
+                imageUrl: _userBooks[index].imageUrl,
+              ),
             ),
             title: Text(_userBooks[index].title),
             subtitle: Text(_userBooks[index].author),

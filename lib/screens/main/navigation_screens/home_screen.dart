@@ -3,6 +3,7 @@ import 'package:book_mingle_ui/models/exchange_book_model.dart';
 import 'package:book_mingle_ui/models/exchange_demand_model.dart';
 import 'package:book_mingle_ui/screens/main/search_screen.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
+import 'package:book_mingle_ui/services/network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -79,10 +80,10 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _onRefresh() async {
-    List<Book> userbooks = await ApiService.getUserBookList();
+    List<Book> userBooks = await ApiService.getUserBookList();
     setState(() {
       dropdown = [];
-      for (Book book in userbooks) {
+      for (Book book in userBooks) {
         dropdown.add(DropdownMenuEntry(value: book, label: book.title));
       }
     });
@@ -112,7 +113,10 @@ class _HomeScreenState extends State<HomeScreen>
           ),
           child: ListTile(
             leading: CircleAvatar(
-              child: Text(index.toString()),
+              child: CustomNetWorkImage(
+                imageUrl: _items[index].imageUrl,
+              ),
+              // child: Text(index.toString()),
             ),
             title: Text(_items[index].title),
             subtitle: Text(_items[index].author),

@@ -4,6 +4,7 @@ import 'package:book_mingle_ui/models/book_model.dart';
 import 'package:book_mingle_ui/models/exchange_book_model.dart';
 import 'package:book_mingle_ui/models/exchange_demand_model.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
+import 'package:book_mingle_ui/services/network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -134,7 +135,9 @@ class _SearchScreenState extends State<SearchScreen> {
         child: ListTile(
           onTap: () => _bookRequestDialog(_items[index]),
           leading: CircleAvatar(
-            child: Text(index.toString()),
+            child: CustomNetWorkImage(
+              imageUrl: _items[index].imageUrl,
+            ),
           ),
           title: Text(_items[index].title),
           subtitle: Text(_items[index].author),
