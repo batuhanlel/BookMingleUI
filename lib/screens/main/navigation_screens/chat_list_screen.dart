@@ -1,7 +1,7 @@
 import 'package:book_mingle_ui/models/chat_model.dart';
 import 'package:book_mingle_ui/models/user_model.dart';
-import 'package:book_mingle_ui/screens/exchange_demands_screen.dart';
-import 'package:book_mingle_ui/screens/main/navigation_screens/chat_screen.dart';
+import 'package:book_mingle_ui/screens/main/exchange_demands_screen.dart';
+import 'package:book_mingle_ui/screens/main/chat_screen.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
