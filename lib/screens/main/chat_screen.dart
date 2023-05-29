@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:book_mingle_ui/constant.dart';
+import 'package:book_mingle_ui/models/message_model.dart';
 import 'package:book_mingle_ui/models/user_model.dart';
+import 'package:book_mingle_ui/services/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
+import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:stomp_dart_client/stomp.dart';
 import 'package:stomp_dart_client/stomp_config.dart';
@@ -28,8 +31,10 @@ class _ChatScreenState extends State<ChatScreen> {
   late types.User _receiverForChat;
   late User _sender;
   late User _receiver;
+  int _page = 0;
+  bool _hasNextPage = true;
 
-  final List<types.Message> _messages = [];
+  List<types.Message> _messages = [];
 
   @override
   void initState() {
@@ -38,6 +43,8 @@ class _ChatScreenState extends State<ChatScreen> {
     _senderForChat = types.User(id: widget.sender.id.toString());
     _receiver = widget.receiver;
     _receiverForChat = types.User(id: widget.receiver.id.toString());
+
+    _handleEndReached();
 
     const storage = FlutterSecureStorage();
     Future<String?> getToken() async {
@@ -62,20 +69,44 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _stompClient.deactivate();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: _buildAppBar(),
       body: Chat(
         messages: _messages,
         onSendPressed: _handleSendPressed,
         user: _senderForChat,
+        onEndReached: _handleEndReached,
       ),
     );
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _stompClient.deactivate();
+  AppBar _buildAppBar() {
+    return AppBar(
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        color: Colors.grey,
+        onPressed: _navigateToChatListScreen,
+      ),
+      title: Text(
+        "${_receiver.name} ${_receiver.surname}",
+        style: TextStyle(
+          fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+        ),
+      ),
+      backgroundColor: Colors.white,
+    );
+  }
+
+  void _navigateToChatListScreen() {
+    Navigator.of(context).pop();
   }
 
   void _addMessage(types.Message message) {
@@ -102,6 +133,38 @@ class _ChatScreenState extends State<ChatScreen> {
       }),
     );
     _addMessage(textMessage);
+  }
+
+  Future<void> _handleEndReached() async {
+    if (!_hasNextPage) return;
+
+    List<ChatMessage> prevMessages =
+        await ApiService.getChatMessages(_page, _sender.id, _receiver.id);
+
+    if (prevMessages.isEmpty) {
+      setState(() {
+        _hasNextPage = false;
+      });
+      return;
+    }
+
+    List<types.Message> processedMessages = [];
+    for (ChatMessage message in prevMessages) {
+      processedMessages.add(
+        types.TextMessage(
+          author: message.senderId == _sender.id
+              ? _senderForChat
+              : _receiverForChat,
+          id: randomString(),
+          text: message.content,
+        ),
+      );
+    }
+
+    setState(() {
+      _messages = [..._messages, ...processedMessages];
+      _page = _page + 1;
+    });
   }
 
   String randomString() {

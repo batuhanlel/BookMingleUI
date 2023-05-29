@@ -6,6 +6,7 @@ import 'package:book_mingle_ui/models/chat_model.dart';
 import 'package:book_mingle_ui/models/exchange_book_model.dart';
 import 'package:book_mingle_ui/models/exchange_demand_model.dart';
 import 'package:book_mingle_ui/models/login_model.dart';
+import 'package:book_mingle_ui/models/message_model.dart';
 import 'package:book_mingle_ui/models/signup_model.dart';
 import 'package:book_mingle_ui/models/user_model.dart';
 import 'package:book_mingle_ui/models/user_profile_model.dart';
@@ -279,6 +280,32 @@ class ApiService {
 
     if (response.statusCode == 200) {
       return chatFromJson(response.body);
+    } else {
+      throw Exception("Failed to Get Data");
+    }
+  }
+
+  static Future<List<ChatMessage>> getChatMessages(int page, int user1Id, int user2Id) async {
+    const storage = FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    String url = "$baseUrl/chat/messages/get";
+    final headers = {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Accept' : '*/*',
+      'Authorization' : 'Bearer $token'
+    };
+
+    Map<String, dynamic> params = {
+      "page": page.toString(),
+      "user1Id": user1Id.toString(),
+      "user2Id": user2Id.toString(),
+    };
+    final response = await http.get(Uri.parse(url).replace(queryParameters: params), headers: headers);
+
+
+    if (response.statusCode == 200) {
+      return messageFromJson(response.body);
     } else {
       throw Exception("Failed to Get Data");
     }
