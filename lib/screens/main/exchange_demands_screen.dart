@@ -1,5 +1,6 @@
 import 'package:book_mingle_ui/models/exchange_demand_model.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
+import 'package:book_mingle_ui/services/network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -42,6 +43,12 @@ class _ExchangeDemandsScreenState extends State<ExchangeDemandsScreen> {
         icon: const Icon(Icons.arrow_back),
         color: Colors.grey,
         onPressed: _navigateToChatListScreen,
+      ),
+      title: Text('Exchange Requests',
+        style: TextStyle(
+          fontSize: Theme.of(context).textTheme.bodyLarge?.fontSize,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
+        ),
       ),
       backgroundColor: Colors.white,
     );
@@ -111,10 +118,33 @@ class _ExchangeDemandsScreenState extends State<ExchangeDemandsScreen> {
           ),
           child: ListTile(
             leading: CircleAvatar(
-              child: Text(index.toString()),
+              child: CustomNetWorkImage(
+                imageUrl: _exchangeDemandItems[index].proposedBook.imageUrl,
+              ),
             ),
-            title: Text(_exchangeDemandItems[index].proposedBook.title),
-            subtitle: Text(_exchangeDemandItems[index].proposedBook.author),
+            title: Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    _exchangeDemandItems[index].proposedBook.title,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    " by ${_exchangeDemandItems[index].proposedBook.author}",
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            subtitle: Text(
+                "- ${_exchangeDemandItems[index].requesterUser.name} ${_exchangeDemandItems[index].requesterUser.surname}"),
           ),
         ),
       ),
@@ -126,7 +156,7 @@ class _ExchangeDemandsScreenState extends State<ExchangeDemandsScreen> {
     showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Accept request?'),
+        title: Text('User Wants to Exchange With \'${demandResponse.requestedBook.title}\'\nAccept request?'),
         actions: [
           TextButton(
             onPressed: () async {
