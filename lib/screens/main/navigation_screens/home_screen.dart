@@ -5,6 +5,7 @@ import 'package:book_mingle_ui/screens/main/search_screen.dart';
 import 'package:book_mingle_ui/services/api_service.dart';
 import 'package:book_mingle_ui/services/network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,11 +17,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with AutomaticKeepAliveClientMixin {
+  final Location _location = Location();
+  bool _isLocationServiceEnabled = false;
+  bool _isLocationPermissionGranted = false;
+  late double _latitude;
+  late double _longitude;
+
   late Book _selectedBookForExchange;
   late List<DropdownMenuEntry<Book>> dropdown;
   List<ExchangeBookResponseModel> _items = [];
   int _currentPage = 0;
-  bool _hasNextPage = true;
   late ExchangeBookRequestModel _bookRequestModel;
   final RefreshController _refreshController =
       RefreshController(initialRefresh: true);
@@ -80,6 +86,13 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Future<void> _onRefresh() async {
+    await requestLocationPermission();
+
+    if (!_isLocationServiceEnabled || !_isLocationPermissionGranted) {
+      _refreshController.refreshToIdle();
+      return;
+    }
+
     List<Book> userBooks = await ApiService.getUserBookList();
     setState(() {
       dropdown = [];
@@ -93,13 +106,6 @@ class _HomeScreenState extends State<HomeScreen>
         ? _refreshController.refreshCompleted()
         : _refreshController.refreshFailed();
   }
-
-  // Future<void> _onLoading() async {
-  //   bool isSuccessful = await _loadMore();
-  //   isSuccessful
-  //       ? _refreshController.loadComplete()
-  //       : _refreshController.loadNoData();
-  // }
 
   ListView _buildListView() {
     return ListView.builder(
@@ -225,40 +231,59 @@ class _HomeScreenState extends State<HomeScreen>
   Future<bool> _firstLoad() async {
     _currentPage = 0;
     _bookRequestModel.page = _currentPage;
-    _hasNextPage = true;
     _refreshController.loadComplete();
-    List<ExchangeBookResponseModel> response =
-        await ApiService.exchangeBookRecommendations();
-    if (response.isNotEmpty) {
+    try {
+      List<ExchangeBookResponseModel> response =
+      await ApiService.exchangeBookRecommendations(_latitude, _longitude);
       setState(() {
         _items = response;
       });
       return true;
+    } catch (e) {
+      return false;
     }
-    return false;
   }
 
-  // Future<bool> _loadMore() async {
-  //   if (!_hasNextPage) {
-  //     return false;
-  //   }
-  //
-  //   _currentPage++;
-  //   _bookRequestModel.page = _currentPage;
-  //
-  //   List<ExchangeBookResponseModel> response =
-  //       await ApiService.exchangeBookRecommendation(_bookRequestModel);
-  //   if (response.isNotEmpty) {
-  //     setState(() {
-  //       _items.addAll(response);
-  //     });
-  //     return true;
-  //   }
-  //   setState(() {
-  //     _hasNextPage = false;
-  //   });
-  //   return false;
-  // }
+  Future<void> requestLocationPermission() async {
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+
+    serviceEnabled = await _location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await _location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+    setState(() {
+      _isLocationServiceEnabled = true;
+    });
+
+    permissionGranted = await _location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await _location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+    setState(() {
+      _isLocationPermissionGranted = true;
+    });
+
+    await getLocation();
+  }
+
+  Future<void> getLocation() async {
+    try {
+      LocationData locationData = await _location.getLocation();
+      setState(() {
+        _latitude = locationData.latitude!;
+        _longitude = locationData.longitude!;
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   bool get wantKeepAlive => true;

@@ -51,7 +51,7 @@ class ApiService {
     }
   }
 
-  static Future<List<ExchangeBookResponseModel>> exchangeBookRecommendations() async {
+  static Future<List<ExchangeBookResponseModel>> exchangeBookRecommendations(double latitude, double longitude) async {
     const storage = FlutterSecureStorage();
     final token = await storage.read(key: 'token');
     String url = "$baseUrl/exchange/recommendations";
@@ -62,7 +62,9 @@ class ApiService {
       'Authorization' : 'Bearer $token'
     };
 
-    final response = await http.get(Uri.parse(url), headers: headers);
+    Map<String, dynamic> params = {"latitude": latitude.toString(), "longitude": longitude.toString()};
+    final response = await http.get(Uri.parse(url).replace(queryParameters: params), headers: headers);
+
     if (response.statusCode == 200) {
       List<dynamic> jsonArray = jsonDecode(response.body);
       List<ExchangeBookResponseModel> items = [];
