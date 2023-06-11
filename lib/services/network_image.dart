@@ -16,12 +16,20 @@ class _CustomNetWorkImageState extends State<CustomNetWorkImage> {
   @override
   void initState() {
     super.initState();
-    _imageFuture = fetchImage();
+    _imageFuture = fetchImage(widget.imageUrl);
   }
 
-  Future<Uint8List> fetchImage() async {
+  @override
+  void didUpdateWidget(covariant CustomNetWorkImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.imageUrl != oldWidget.imageUrl) {
+      _imageFuture = fetchImage(widget.imageUrl);
+    }
+  }
+
+  Future<Uint8List> fetchImage(String imageUrl) async {
     final response = await http.get(
-      Uri.parse(widget.imageUrl),
+      Uri.parse(imageUrl),
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36',
       },
